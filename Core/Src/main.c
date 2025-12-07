@@ -27,8 +27,8 @@
 #include "motor.h"
 #include "mpu6050.h"
 #include "Balance_fis.h"
-#define K_pitch 0.2f
-#define K_pitch_dot 0.01f
+#define K_e 0.2f
+#define K_e_dot 0.01f
 #define K_u 3000
 /* USER CODE END Includes */
 
@@ -86,7 +86,7 @@ Balance_t Balance;
 void MPU_Calibrate_On_Startup(void) {
     double total_angle = 0; 
     
-    int samples = 2500; 
+    int samples = 1000; 
     for(int i = 0; i < 250; i++) {
         MPU6050_Read_All(&hi2c1, &MPU);
         HAL_Delay(2); 
@@ -207,20 +207,43 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  {
 
 				MPU6050_Read_All(&hi2c1, &MPU);
-        Balance.pitch = MPU.CFAngleY - MPU_Offset;
-			  Balance.pitch_dot = MPU.Gy;// van toc do/s , dao ham cua pitch
-			  Balance.input[0] = Balance.pitch *  K_pitch;
-			  Balance.input[1] = Balance.pitch_dot * K_pitch_dot;
+        // 1. Tính toán giá tr? th?c t?
+				float measure_pitch = MPU.CFAngleY - MPU_Offset;
+				float measure_pitch_dot = MPU.Gy; 
 
-			  Balance_run(Balance.input,&Balance.output);
+				// 2. Tính Sai s? (Error) và Ð?o hàm sai s? (D_Error)
+				// Setpoint là 0 (cân b?ng)
+				// Slide 37: e = r - y [cite: 641]
+				float error = 0.0f - measure_pitch;       
+				float d_error = 0.0f - measure_pitch_dot; 
 
-			  if (Balance.pitch > 45.0f || Balance.pitch < -45.0f) {
-            Balance.output = 0;					
-        }
+				// 3. Chu?n hóa (Scaling) d? dua vào b? Fuzzy
+				// K_pitch dóng vai trò là Ke (Slide 34: K1)
+				// K_pitch_dot dóng vai trò là Kde (Slide 34: K2)
+				Balance.input[0] = error * K_e;       
+				Balance.input[1] = d_error * K_e_dot; 
 
-			  int pwm_val = (int)(Balance.output * K_u);
-        MotorSetDuty1(pwm_val);
-        MotorSetDuty2(pwm_val);
+				// Gi?i h?n d?u vào trong kho?ng [-1, 1] d? an toàn cho b? m?
+				if (Balance.input[0] > 1.0f) Balance.input[0] = 1.0f;
+				else if (Balance.input[0] < -1.0f) Balance.input[0] = -1.0f;
+				
+				if (Balance.input[1] > 1.0f) Balance.input[1] = 1.0f;
+				else if (Balance.input[1] < -1.0f) Balance.input[1] = -1.0f;
+
+				// 4. Tính toán Fuzzy
+				Balance_run(Balance.input, &Balance.output);
+
+				// 5. Ng?t an toàn khi góc quá l?n
+				if (measure_pitch > 45.0f || measure_pitch < -45.0f) {
+					 Balance.output = 0;
+				}
+
+				// 6. Tính PWM d?u ra (Slide 34: Ku)
+				// Balance.output t? b? m? thu?ng n?m trong kho?ng [-1, 1]
+				int pwm_val = (int)(Balance.output * K_u);
+				
+				MotorSetDuty1(pwm_val);
+				MotorSetDuty2(pwm_val);
 }
 }
 /* USER CODE END 4 */
