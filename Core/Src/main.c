@@ -27,8 +27,8 @@
 #include "motor.h"
 #include "mpu6050.h"
 #include "Balance_fis.h"
-#define K_pitch 1/5
-#define K_pitch_dot 1/100
+#define K_pitch 0.2f
+#define K_pitch_dot 0.01f
 #define K_u 3000
 /* USER CODE END Includes */
 
@@ -86,7 +86,7 @@ Balance_t Balance;
 void MPU_Calibrate_On_Startup(void) {
     double total_angle = 0; 
     
-    int samples = 1000; 
+    int samples = 2500; 
     for(int i = 0; i < 250; i++) {
         MPU6050_Read_All(&hi2c1, &MPU);
         HAL_Delay(2); 
@@ -139,12 +139,11 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-	HAL_TIM_Base_Start_IT(&htim2);
 	Balance_init(); 
 	while(MPU6050_Init(&hi2c1) == 1);
 	HAL_Delay(100);
 	MPU_Calibrate_On_Startup();
-
+	HAL_TIM_Base_Start_IT(&htim2);
 	current = CF;
   /* USER CODE END 2 */
 
@@ -208,9 +207,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  {
 
 				MPU6050_Read_All(&hi2c1, &MPU);
-        Balance.pitch = MPU.CFAngleY;
+        Balance.pitch = MPU.CFAngleY - MPU_Offset;
 			  Balance.pitch_dot = MPU.Gy;// van toc do/s , dao ham cua pitch
-			  Balance.input[0] = MPU.CFAngleY *  K_pitch;
+			  Balance.input[0] = Balance.pitch *  K_pitch;
 			  Balance.input[1] = Balance.pitch_dot * K_pitch_dot;
 
 			  Balance_run(Balance.input,&Balance.output);
