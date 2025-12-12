@@ -49,6 +49,7 @@ The controller defines inputs and outputs using linguistic variables normalized 
     * Sets: `NB`, `NM`, `NS`, `ZE`, `PS`, `PM`, `PB` (Sugeno Constants).
     * 
 *(Image illustrating the Membership Functions for e, edot, and u)*
+
 <img width="434" height="341" alt="image" src="https://github.com/user-attachments/assets/4aecd96e-e1c0-4176-8197-05a04247a543" />
 <img width="396" height="159" alt="image" src="https://github.com/user-attachments/assets/e3dab52b-4019-4fd5-baa6-f81c9def3066" />
 
