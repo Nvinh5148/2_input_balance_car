@@ -4,8 +4,21 @@
 
 This project involves the design and implementation of a **Two-Wheeled Self-Balancing Robot** using the **STM32F103C8T6** microcontroller and a **Fuzzy PD Controller**. The system is capable of maintaining static balance and recovering quickly from external disturbances.
 
+##  Real Hardware Implementation
 
-## 🛠️ Hardware
+The physical model is constructed using a 2-layer acrylic chassis to ensure stability and organized wiring.
+
+### 1. Wiring Diagram
+The complete connection schematic including the power block, central processing unit, and motor driver.
+
+<img width="585" height="368" alt="image" src="https://github.com/user-attachments/assets/04720585-705c-46c4-bacb-b083bd7e396f" />
+
+
+### 2. Finished Model
+The heavy components (Battery, Motors) are placed on the bottom layer to lower the center of gravity, while the control circuits (STM32, L298N) are mounted on the top layer.
+
+<img width="894" height="670" alt="image" src="https://github.com/user-attachments/assets/c16c8d33-3fa4-4895-952d-1b89b0d769ff" />
+
 
 The system is built using the following main components:
 
@@ -18,11 +31,11 @@ The system is built using the following main components:
 | **Power Source** | LiPo 4S Battery (14.8V) | High discharge rate (45C) |
 | **Buck Converter** | LM2596 | Steps down 14.8V to 5V/3.3V for logic |
 
-## 🔌 Pinout & Wiring
+##  Pinout & Wiring
 
 ### MPU6050 (I2C2)
-* **SCL**: `PB10`
-* **SDA**: `PB11`
+* **SCL**: `PB8`
+* **SDA**: `PB9`
 * **VCC**: 3.3V
 * **GND**: GND
 
@@ -95,8 +108,17 @@ Optimal parameters were determined through experimental tuning with a 4S LiPo ba
 
 *(Impulse response graph from STMStudio)*
 
-##  Installation & Usage
+##  References & Credits
 
-1. Clone this repository:
-   ```bash
-   git clone [https://github.com/your-username/stm32-balance-car-fuzzy.git](https://github.com/your-username/stm32-balance-car-fuzzy.git)
+Special thanks to the open-source community. This project utilizes the following libraries:
+
+* **[qlibs](https://github.com/kmilo17pet/qlibs)** by *kmilo17pet*: Used for the **qFIS (Fuzzy Inference System)** engine implementation.
+* **[MPU6050](https://github.com/leech001/MPU6050)** by *leech001*: Used for MPU6050 I2C communication and **Kalman Filter** algorithm.
+
+##  Author
+
+* **Name:** [Nguyen Vinh]
+* **University:** Ho Chi Minh City University of Technology (HCMUT)
+
+---
+*If you find this project useful, please give it a ⭐!*
