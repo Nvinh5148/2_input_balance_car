@@ -1,62 +1,108 @@
 # STM32 Self-Balancing Robot - Fuzzy Logic Control
 
-![Status](https://img.shields.io/badge/Status-Completed-green) ![Platform](https://img.shields.io/badge/Platform-STM32-blue) ![Algorithm](https://img.shields.io/badge/Control-Fuzzy%20Logic-orange)
+![Project Banner](https://img.shields.io/badge/STM32-F103C8T6-blue) ![Algorithm](https://img.shields.io/badge/Control-Fuzzy%20Logic-orange) ![Status](https://img.shields.io/badge/Status-Completed-green)
 
-**Two-Wheeled Self-Balancing Robot** project powered by **STM32F103C8T6** and **Fuzzy PD Controller**. The robot is capable of maintaining static balance, resisting external disturbances, and recovering quickly to the upright position.
+This project involves the design and implementation of a **Two-Wheeled Self-Balancing Robot** using the **STM32F103C8T6** microcontroller and a **Fuzzy PD Controller**. The system is capable of maintaining static balance and recovering quickly from external disturbances.
 
 ## 🎥 Demo
-
-![Project Demo](LINK_TO_YOUR_DEMO_GIF_HERE)
+*(Insert a link to a demo video or a GIF of the balancing robot here)*
 
 ## 🛠️ Hardware
 
-* **Microcontroller:** STM32F103C8T6 (Blue Pill)
-* **Sensor:** MPU6050 (6-DOF IMU)
-* **Actuator:** DC Geared Motor JGB37-520
-* **Driver:** L298N Dual H-Bridge
-* **Power:** LiPo Battery 4S (14.8V) - High discharge rate
-* **Regulator:** LM2596 Buck Converter (14.8V to 5V)
+The system is built using the following main components:
 
-## 🧠 Control Algorithm: Fuzzy Logic
+| Component | Detail | Note |
+| :--- | :--- | :--- |
+| **Microcontroller** | STM32F103C8T6 (Blue Pill) | ARM Cortex-M3, 72MHz |
+| **IMU Sensor** | MPU6050 | Accelerometer + Gyroscope (6-DOF) |
+| **Motors** | DC Geared Motor JGB37-520 | Equipped with Encoder (Not used in v1.0) |
+| **Motor Driver** | L298N | Dual H-Bridge Module |
+| **Power Source** | LiPo 4S Battery (14.8V) | High discharge rate (45C) |
+| **Buck Converter** | LM2596 | Steps down 14.8V to 5V/3.3V for logic |
 
-Unlike traditional PID controllers, this project uses a **Sugeno Fuzzy Logic Controller** to handle the non-linear dynamics of the balancing robot.
+## 🔌 Pinout & Wiring
+
+### MPU6050 (I2C2)
+* **SCL**: `PB10`
+* **SDA**: `PB11`
+* **VCC**: 3.3V
+* **GND**: GND
+
+### L298N Driver (Timer 3 PWM)
+* **IN1**: `PA6` (TIM3_CH1)
+* **IN2**: `PA7` (TIM3_CH2)
+* **IN3**: `PB0` (TIM3_CH3)
+* **IN4**: `PB1` (TIM3_CH4)
+
+*(Note: Encoder pins PA0, PA1, PB6, PB7 are reserved for future Position Control development)*
+
+## 🧠 Control Algorithm (Fuzzy Logic)
+
+This project utilizes a **Fuzzy Logic Controller (Sugeno Model)** to better handle the system's non-linearity compared to a traditional PID controller.
 
 ### 1. Linguistic Variables & Membership Functions
-We define 3 linguistic variables with normalized ranges [-1, 1]:
-* **Input 1 ($e$):** Tilt Angle Error.
-* **Input 2 ($\dot{e}$):** Angular Velocity (Gyro rate).
-* **Output ($u$):** PWM Control Signal.
+The controller defines inputs and outputs using linguistic variables normalized to the range $[-1, 1]$.
 
-![Linguistic Variables Definition](LINK_TO_IMAGE_OF_MEMBERSHIP_FUNCTIONS_HERE)
-*(Figure: Membership Functions for Error, Error_dot, and Output)*
+* **Input 1: Error ($e$)**: Tilt angle error.
+    * Sets: `NB`, `NS`, `ZE`, `PS`, `PB` (Trapezoidal/Triangular).
+* **Input 2: Error_dot ($\dot{e}$)**: Angular velocity (Gyro).
+    * Sets: `NB`, `NS`, `ZE`, `PS`, `PB` (Trapezoidal/Triangular).
+* **Output: Control Signal ($u$)**: PWM duty cycle factor.
+    * Sets: `NB`, `NM`, `NS`, `ZE`, `PS`, `PM`, `PB` (Sugeno Constants).
 
-### 2. Fuzzy Rule Base
-The controller operates based on a 5x5 rule matrix (25 rules total). The diagonal arrangement ensures stability and smooth damping response.
+![Membership Functions](path/to/image_aa7c5d.png)
+*(Image illustrating the Membership Functions for e, edot, and u)*
 
-![Fuzzy Rule Base Table](LINK_TO_IMAGE_OF_RULE_TABLE_HERE)
-*(Figure: The 5x5 Fuzzy Rule Base Table)*
+### 2. Fuzzy Rule Base (5x5 Matrix)
+The system uses a set of 25 rules based on a diagonal structure to ensure stability and smooth damping.
 
-### 3. Rule Visualization
-The surface below illustrates how the inputs ($e, \dot{e}$) map to the control output ($u$), showing the non-linear response of the controller.
+| $\dot{e}$ \ $e$ | NB | NS | ZE | PS | PB |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **NB** | NB | NB | NM | NS | ZE |
+| **NS** | NB | NM | NS | ZE | PS |
+| **ZE** | NM | NS | ZE | PS | PM |
+| **PS** | NS | ZE | PS | PM | PB |
+| **PB** | ZE | PS | PM | PB | PB |
 
-![Fuzzy Surface / Rule Illustration](LINK_TO_IMAGE_OF_RULE_ILLUSTRATION_HERE)
-*(Figure: Fuzzy Control Surface / Visualization of Rules)*
+### 3. Rule Illustration
+The interaction between inputs ($e, \dot{e}$) and output ($u$) creates a control surface that defines the robot's behavior.
 
-### 4. System Flowchart
-The control loop runs inside a **10ms Timer Interrupt**:
-1.  Read MPU6050.
-2.  Compute Angle (Kalman/Complementary Filter).
-3.  Fuzzification -> Inference -> Defuzzification.
-4.  Write PWM to Motors.
+![Fuzzy Rules Illustration](path/to/your/fuzzy_rules_illustration.png)
+*(Insert image illustrating the firing of specific rules or the Control Surface)*
 
-![Timer Interrupt Flowchart](LINK_TO_YOUR_FLOWCHART_IMAGE_HERE)
+### 4. Controller Flowchart
+The control loop operates on a **10ms** Timer Interrupt:
+1. Read MPU6050 data.
+2. Calculate Tilt Angle (Kalman/Complementary Filter).
+3. Normalize inputs to $[-1, 1]$.
+4. **Fuzzification -> Inference -> Defuzzification**.
+5. Output PWM signal.
+
+![Timer Interrupt Flowchart](path/to/your/flowchart_image.png)
 
 ## ⚙️ Tuning Parameters
 
-Optimal parameters found for 4S Battery setup:
+Optimal parameters were determined through experimental tuning with a 4S LiPo battery:
 
 | Parameter | Value | Description |
 | :--- | :--- | :--- |
-| **K_e** | `0.2` | Error Scaling (Stiffness) |
-| **K_e_dot** | `0.01` | Gyro Scaling (Damping) |
-| **K_
+| **K_e** | `0.2` | Error Scaling Factor (Stiffness - Proportional) |
+| **K_e_dot** | `0.01` | Error_dot Scaling Factor (Damping - Derivative) |
+| **K_u** | `3000` | Output Gain (PWM Conversion) |
+
+## 📊 Experimental Results
+
+* **Static Balance:** The robot maintains a stable tilt angle at $0^\circ$ (after Offset Calibration).
+* **Robustness:**
+    * Withstands forced tilt angles up to **25°-30°**.
+    * Recovery time to equilibrium: **1-2 seconds**.
+    * Utilizes maximum power from the 4S battery to generate high torque.
+
+![STMStudio Graph](path/to/stmstudio_result.png)
+*(Impulse response graph from STMStudio)*
+
+## 🚀 Installation & Usage
+
+1. Clone this repository:
+   ```bash
+   git clone [https://github.com/your-username/stm32-balance-car-fuzzy.git](https://github.com/your-username/stm32-balance-car-fuzzy.git)
