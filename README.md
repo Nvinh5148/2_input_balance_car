@@ -47,9 +47,10 @@ The controller defines inputs and outputs using linguistic variables normalized 
     * Sets: `NB`, `NS`, `ZE`, `PS`, `PB` (Trapezoidal/Triangular).
 * **Output: Control Signal ($u$)**: PWM duty cycle factor.
     * Sets: `NB`, `NM`, `NS`, `ZE`, `PS`, `PM`, `PB` (Sugeno Constants).
-
-![Membership Functions](path/to/image_aa7c5d.png)
+    * 
 *(Image illustrating the Membership Functions for e, edot, and u)*
+<img width="434" height="341" alt="image" src="https://github.com/user-attachments/assets/4aecd96e-e1c0-4176-8197-05a04247a543" />
+<img width="396" height="159" alt="image" src="https://github.com/user-attachments/assets/e3dab52b-4019-4fd5-baa6-f81c9def3066" />
 
 ### 2. Fuzzy Rule Base (5x5 Matrix)
 The system uses a set of 25 rules based on a diagonal structure to ensure stability and smooth damping.
@@ -89,7 +90,8 @@ Optimal parameters were determined through experimental tuning with a 4S LiPo ba
     * Recovery time to equilibrium: **1-2 seconds**.
     * Utilizes maximum power from the 4S battery to generate high torque.
 
-![STMStudio Graph](path/to/stmstudio_result.png)
+<img width="843" height="606" alt="image" src="https://github.com/user-attachments/assets/e8bca19a-274d-41b8-9e7b-57f1de9a36c5" />
+
 *(Impulse response graph from STMStudio)*
 
 ##  Installation & Usage
