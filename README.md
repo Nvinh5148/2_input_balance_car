@@ -4,8 +4,6 @@
 
 This project involves the design and implementation of a **Two-Wheeled Self-Balancing Robot** using the **STM32F103C8T6** microcontroller and a **Fuzzy PD Controller**. The system is capable of maintaining static balance and recovering quickly from external disturbances.
 
-## 🎥 Demo
-*(Insert a link to a demo video or a GIF of the balancing robot here)*
 
 ## 🛠️ Hardware
 
@@ -36,7 +34,7 @@ The system is built using the following main components:
 
 *(Note: Encoder pins PA0, PA1, PB6, PB7 are reserved for future Position Control development)*
 
-## 🧠 Control Algorithm (Fuzzy Logic)
+##  Control Algorithm (Fuzzy Logic)
 
 This project utilizes a **Fuzzy Logic Controller (Sugeno Model)** to better handle the system's non-linearity compared to a traditional PID controller.
 
@@ -64,11 +62,6 @@ The system uses a set of 25 rules based on a diagonal structure to ensure stabil
 | **PS** | NS | ZE | PS | PM | PB |
 | **PB** | ZE | PS | PM | PB | PB |
 
-### 3. Rule Illustration
-The interaction between inputs ($e, \dot{e}$) and output ($u$) creates a control surface that defines the robot's behavior.
-
-![Fuzzy Rules Illustration](path/to/your/fuzzy_rules_illustration.png)
-*(Insert image illustrating the firing of specific rules or the Control Surface)*
 
 ### 4. Controller Flowchart
 The control loop operates on a **10ms** Timer Interrupt:
@@ -78,9 +71,7 @@ The control loop operates on a **10ms** Timer Interrupt:
 4. **Fuzzification -> Inference -> Defuzzification**.
 5. Output PWM signal.
 
-![Timer Interrupt Flowchart](path/to/your/flowchart_image.png)
-
-## ⚙️ Tuning Parameters
+##  Tuning Parameters
 
 Optimal parameters were determined through experimental tuning with a 4S LiPo battery:
 
@@ -90,7 +81,7 @@ Optimal parameters were determined through experimental tuning with a 4S LiPo ba
 | **K_e_dot** | `0.01` | Error_dot Scaling Factor (Damping - Derivative) |
 | **K_u** | `3000` | Output Gain (PWM Conversion) |
 
-## 📊 Experimental Results
+##  Experimental Results
 
 * **Static Balance:** The robot maintains a stable tilt angle at $0^\circ$ (after Offset Calibration).
 * **Robustness:**
@@ -101,7 +92,7 @@ Optimal parameters were determined through experimental tuning with a 4S LiPo ba
 ![STMStudio Graph](path/to/stmstudio_result.png)
 *(Impulse response graph from STMStudio)*
 
-## 🚀 Installation & Usage
+##  Installation & Usage
 
 1. Clone this repository:
    ```bash
